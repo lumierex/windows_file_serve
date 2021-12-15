@@ -3,19 +3,33 @@ package main
 import (
 	"context"
 	"fmt"
+	"github.com/gin-gonic/gin"
 	"log"
 	"net/http"
 	"os"
 	"os/signal"
 	"serve/util"
 	"time"
-	"github.com/gin-gonic/gin"
 )
 
 func main() {
 	disk_parts := []string{"a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z"}
-	r := gin.Default()
-
+	gin.SetMode(gin.ReleaseMode)
+	r := gin.New()
+	r.Use(gin.LoggerWithFormatter(func(param gin.LogFormatterParams) string {
+		return fmt.Sprintf("%s - [%s] \"%s %s %s %d %s \"%s\" %s\"\n",
+			param.ClientIP,
+			param.TimeStamp.Format(time.RFC1123),
+			param.Method,
+			param.Path,
+			param.Request.Proto,
+			param.StatusCode,
+			param.Latency,
+			param.Request.UserAgent(),
+			param.ErrorMessage,
+		)
+	}))
+	r.Use(gin.Recovery())
 	r.GET("/", func(c *gin.Context) {
 		// c.JSON(http.StatusOK, hom4)
 		html := util.GetVisitHTML()
@@ -36,7 +50,7 @@ func main() {
 			log.Fatalf("listen: %s\n", err)
 		}
 	}()
-	log.Println("please visit: ", fmt.Sprintf("http://%s:%d", ip, util.PORT))
+	log.Println("start server success please open browser and visit: ", fmt.Sprintf("http://%s:%d", ip, util.PORT))
 	quit := make(chan os.Signal)
 	signal.Notify(quit, os.Interrupt)
 	<-quit

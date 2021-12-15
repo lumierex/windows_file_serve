@@ -67,10 +67,8 @@ func GetVisitHTML() string {
 	for _, drive := range drives {
 		d := strings.ToLower(drive)
 		d = d[0:1]
-		fmt.Println(d)
 		link := http_host + "/" + d + "/"
 		node := fmt.Sprintf("<h3><a href='%s'>%s</a></h3>", link, d)
-		fmt.Println(node)
 		template += node
 	}
 	return template
